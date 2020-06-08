@@ -1,0 +1,11 @@
+digraph {
+  rankdir = "LR";
+  node [fontname = "Ubuntu"];
+
+  "a.js" -> { "b.js" "c.js" };
+  "b.js" -> "c.js" -> "d.js" -> "f.js";
+  "b.js" -> "e.js";
+  "f.js" -> "c.js";
+
+  "g.js" -> "h.js";
+}
