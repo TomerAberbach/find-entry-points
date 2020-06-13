@@ -10,6 +10,11 @@ Supports Node.js versions 10 and above.
 $ npm i find-entry-points
 ```
 
+![](docs/example1.svg)
+![](docs/example2.svg)
+![](docs/example3.svg)
+![](docs/example4.svg)
+
 ## Contributing
 
 Stars are always welcome!
