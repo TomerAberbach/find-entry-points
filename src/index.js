@@ -50,7 +50,24 @@ export const findEntryPoints = async (
     .map(entryPointComponent => Array.from(entryPointComponent))
 }
 
-export const findSingleEntryPoints = async (iterable, options) =>
-  (await findEntryPoints(iterable, options))
-    .filter(entryPointComponent => entryPointComponent.length === 1)
-    .map(entryPointComponent => entryPointComponent[0])
+export const findSingleEntryPoints = async (
+  iterable,
+  { followDynamicImports = true } = {}
+) => {
+  const graph = await createGraph(iterable, { followDynamicImports })
+  const entryPoints = new Set(graph.keys())
+  const promises = []
+
+  for (const { imports } of graph) {
+    promises.push(
+      (async () => {
+        for (const filename of await imports) {
+          entryPoints.delete(filename)
+        }
+      })()
+    )
+  }
+
+  await Promise.all(promises)
+  return [...entryPoints]
+}
