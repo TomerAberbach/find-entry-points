@@ -8,4 +8,5 @@ digraph {
   "f.js" -> "c.js";
 
   "g.js" -> "h.js" -> "i.js" -> "g.js";
+  "i.js" -> "j.js";
 }
