@@ -16,7 +16,16 @@
 
 /// <reference types="node"/>
 
-export type Options = { readonly followDynamicImports?: boolean }
+/**
+ * The options type for {@link findEntryPoints} and {@link findSingleEntryPoints}.
+ */
+export interface Options {
+  /**
+   * Determines if dynamic imports (with constant module specifiers) are followed
+   * when constructing dependency graphs in {@link findEntryPoints} and {@link findSingleEntryPoints}.
+   */
+  readonly followDynamicImports?: boolean
+}
 
 export const findEntryPoints: {
   /**
