@@ -77,6 +77,8 @@ import globby from 'globby'
 })()
 ```
 
+See [the commented type definitions](https://github.com/TomerAberbach/find-entry-points/blob/master/src/index.d.ts) for clarification.
+
 ## Contributing
 
 Stars are always welcome!
