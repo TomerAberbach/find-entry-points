@@ -79,6 +79,10 @@ import globby from 'globby'
 
 See [the commented type definitions](https://github.com/TomerAberbach/find-entry-points/blob/master/src/index.d.ts) for clarification.
 
+## How?
+
+The package uses [`parse-imports`](https://github.com/TomerAberbach/parse-imports) (another package of mine) to construct a dependency graph, which is a [directed graph](<https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)#Directed_graph>), from the given set of JavaScript files. Then the package finds the [strongly connected components](https://en.wikipedia.org/wiki/Strongly_connected_component) of the dependency graph using [Tarjan's strongly connected components algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm), and constructs a [directed acyclic graph from the strongly connected components](https://en.wikipedia.org/wiki/Strongly_connected_component#Definitions:~:text=If%20each%20strongly%20connected%20component%20is,contains%20at%20least%20one%20directed%20cycle.). Finally, the package returns the strongly connected components corresponding to the [vertices](<https://en.wikipedia.org/wiki/Vertex_(graph_theory)>) with [in-degree](https://en.wikipedia.org/wiki/Directed_graph#Indegree_and_outdegree) 1 in the new directed acyclic graph.
+
 ## Contributing
 
 Stars are always welcome!
