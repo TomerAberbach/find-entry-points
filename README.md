@@ -1,5 +1,7 @@
 # Find Entry Points
 
+[![NPM version](https://img.shields.io/npm/v/find-entry-points.svg)](https://www.npmjs.com/package/find-entry-points)
+
 > Find the entry points in a set of JavaScript files.
 
 ## Install
