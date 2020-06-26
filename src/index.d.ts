@@ -25,6 +25,15 @@ export interface Options {
    * when constructing dependency graphs in {@link findEntryPoints} and {@link findSingleEntryPoints}.
    */
   readonly followDynamicImports?: boolean
+
+  /**
+   * Called with each JavaScript file's path and code prior to parsing its code
+   * for imports. Can be used to transform to standard ECMAScript so that imports
+   * are properly parsed. Code is not transformed if this option is left unspecified.
+   */
+  readonly transform?: {
+    (file: { path: string; code: string }): PromiseLike<string> | string
+  }
 }
 
 export const findEntryPoints: {

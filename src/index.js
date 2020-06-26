@@ -21,9 +21,9 @@ import pMap from './p-map'
 
 export const findEntryPoints = async (
   iterable,
-  { followDynamicImports = true } = {}
+  { followDynamicImports = true, transform = ({ code }) => code } = {}
 ) => {
-  const graph = await createGraph(iterable, { followDynamicImports })
+  const graph = await createGraph(iterable, { followDynamicImports, transform })
   const entryPointComponents = []
 
   for await (const stronglyConnectedComponent of stronglyConnectedComponents(

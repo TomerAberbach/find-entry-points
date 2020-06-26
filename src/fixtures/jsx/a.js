@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-import { promises as fs } from 'fs'
-import pMap from './p-map'
-import parseImportSpecifiers from './parse-import-specifiers'
+import { OtherComponent } from './b'
 
-const createGraph = async (iterable, { followDynamicImports, transform }) => {
-  const filenames = new Set(
-    await pMap(iterable, filename => fs.realpath(filename))
-  )
-  const graph = new Map()
+const Component = () => (
+  <div>
+    <OtherComponent />
+  </div>
+)
 
-  for (const filename of filenames) {
-    graph.set(filename, {
-      imports: parseImportSpecifiers({
-        filename,
-        filenames,
-        followDynamicImports,
-        transform
-      })
-    })
-  }
-
-  return graph
-}
-
-export default createGraph
+export default Component

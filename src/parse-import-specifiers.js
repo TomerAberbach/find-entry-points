@@ -22,10 +22,14 @@ const ignoredTypes = new Set([`builtin`, `invalid`])
 const parseImportSpecifiers = async ({
   filename,
   filenames,
-  followDynamicImports
+  followDynamicImports,
+  transform
 }) => {
   const importSpecifiers = new Set()
-  const code = await fs.readFile(filename, `utf8`)
+  const code = await transform({
+    path: filename,
+    code: await fs.readFile(filename, `utf8`)
+  })
 
   for (const { isDynamicImport, moduleSpecifier } of await parseImports(code, {
     resolveFrom: filename

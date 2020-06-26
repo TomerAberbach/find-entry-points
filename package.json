@@ -66,6 +66,7 @@
     "@babel/register": "7.10.3",
     "@commitlint/cli": "9.0.1",
     "@commitlint/config-conventional": "9.0.1",
+    "@swc/core": "1.2.6",
     "@tomer/eslint-config": "0.0.5",
     "@tomer/prettier-config": "0.0.2",
     "@types/node": "14.0.14",

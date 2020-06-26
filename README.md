@@ -53,11 +53,14 @@ Suppose the JavaScript files with the following dependencies between them are al
 ```js
 import { findEntryPoints, findSingleEntryPoints } from 'find-entry-points'
 import globby from 'globby'
-;(async () => {
+import * as swc from '@swc/core'
+
+const main = async () => {
   // `globby.stream` returns an async iterable of file paths
   console.log(await findEntryPoints(globby.stream('src/*.js')))
   //=> [['src/a.js'], ['src/g.js', 'src/h.js', 'src/i.js']]
 
+  // `findSingleEntryPoints` ignores cyclic entry points
   console.log(await findSingleEntryPoints(globby.stream('src/*.js')))
   // => ['src/a.js']
 
@@ -74,7 +77,24 @@ import globby from 'globby'
     })
   )
   // => ['src/a.js', 'src/i.js']
-})()
+
+  // Use the `transform` option to transform non-standard syntax
+  // like JSX to standard ECMAScript so that imports can be parsed
+  console.log(
+    await findEntryPoints(globby.stream('src/*.js'), {
+      transform: async ({ path, code }) =>
+        (
+          await transform(code, {
+            filename: path,
+            jsc: { parser: { jsx: true } }
+          })
+        ).code
+    })
+  )
+  //=> [['src/a.js'], ['src/g.js', 'src/h.js', 'src/i.js']]
+}
+
+main()
 ```
 
 See [the commented type definitions](https://github.com/TomerAberbach/find-entry-points/blob/master/src/index.d.ts) for clarification.

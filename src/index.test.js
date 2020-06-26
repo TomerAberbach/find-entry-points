@@ -17,6 +17,7 @@
 import { join } from 'path'
 import test from 'ava'
 import getAllFiles from 'get-all-files'
+import { transform } from '@swc/core'
 import { findEntryPoints } from './index'
 
 const fixturePath = name => join(__dirname, `fixtures`, name)
@@ -29,8 +30,11 @@ const sortEntryPoints = entryPoints => {
   return entryPoints
 }
 
-const macro = async (t, fixtureName, expectedEntryPoints) => {
-  const entryPoints = await findEntryPoints(fixtureFilenames(fixtureName))
+const macro = async (t, fixtureName, expectedEntryPoints, options = {}) => {
+  const entryPoints = await findEntryPoints(
+    fixtureFilenames(fixtureName),
+    options
+  )
   t.deepEqual(
     sortEntryPoints(entryPoints),
     sortEntryPoints(expectedEntryPoints)
@@ -41,20 +45,41 @@ const macro = async (t, fixtureName, expectedEntryPoints) => {
 macro.title = (providedTitle = ``, fixtureName) =>
   `${providedTitle} fixture ${fixtureName}`.trim()
 
-test(macro, `1`, [[fixturePath(`1/b.js`)]])
+test(macro, `normal/1`, [[fixturePath(`normal/1/b.js`)]])
 
-test(macro, `2`, [[fixturePath(`2/d.js`)]])
+test(macro, `normal/2`, [[fixturePath(`normal/2/d.js`)]])
 
-test(macro, `3`, [
-  [fixturePath(`3/a.js`), fixturePath(`3/b.js`), fixturePath(`3/c.js`)]
+test(macro, `normal/3`, [
+  [
+    fixturePath(`normal/3/a.js`),
+    fixturePath(`normal/3/b.js`),
+    fixturePath(`normal/3/c.js`)
+  ]
 ])
 
-test(macro, `4`, [[fixturePath(`4/a.js`)], [fixturePath(`4/c.js`)]])
-
-test(macro, ``, [
-  [fixturePath(`1/b.js`)],
-  [fixturePath(`2/d.js`)],
-  [fixturePath(`3/a.js`), fixturePath(`3/b.js`), fixturePath(`3/c.js`)],
-  [fixturePath(`4/a.js`)],
-  [fixturePath(`4/c.js`)]
+test(macro, `normal/4`, [
+  [fixturePath(`normal/4/a.js`)],
+  [fixturePath(`normal/4/c.js`)]
 ])
+
+test(macro, `normal`, [
+  [fixturePath(`normal/1/b.js`)],
+  [fixturePath(`normal/2/d.js`)],
+  [
+    fixturePath(`normal/3/a.js`),
+    fixturePath(`normal/3/b.js`),
+    fixturePath(`normal/3/c.js`)
+  ],
+  [fixturePath(`normal/4/a.js`)],
+  [fixturePath(`normal/4/c.js`)]
+])
+
+test(macro, `jsx`, [[fixturePath(`jsx/a.js`)]], {
+  transform: async ({ path, code }) =>
+    (
+      await transform(code, {
+        filename: path,
+        jsc: { parser: { jsx: true } }
+      })
+    ).code
+})
