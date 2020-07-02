@@ -60,10 +60,10 @@
   },
   "devDependencies": {
     "@ava/babel": "1.0.1",
-    "@babel/cli": "7.10.3",
-    "@babel/core": "7.10.3",
-    "@babel/preset-env": "7.10.3",
-    "@babel/register": "7.10.3",
+    "@babel/cli": "7.10.4",
+    "@babel/core": "7.10.4",
+    "@babel/preset-env": "7.10.4",
+    "@babel/register": "7.10.4",
     "@commitlint/cli": "9.0.1",
     "@commitlint/config-conventional": "9.0.1",
     "@swc/core": "1.2.6",
@@ -89,6 +89,6 @@
     "power-assert": "1.6.1",
     "prettier": "2.0.5",
     "rimraf": "3.0.2",
-    "tsd": "0.11.0"
+    "tsd": "0.12.0"
   }
 }
