@@ -34,6 +34,22 @@ export interface Options {
   readonly transform?: {
     (file: { path: string; code: string }): PromiseLike<string> | string
   }
+
+  /**
+   * Called with each JavaScript file's path and function for reading its contents asynchronously.
+   * Should return an (optionally async) iterable of filenames imported by the given file
+   * (optionally asynchronously). Can be used to customize import parsing. Uses the `parse-imports`
+   * package if this option is left unspecified.
+   */
+  readonly parseImports?: {
+    (data: {
+      followDynamicImports: boolean
+      file: { path: string; read: () => Promise<string> }
+    }):
+      | Iterable<string>
+      | AsyncIterable<string>
+      | PromiseLike<Iterable<string> | AsyncIterable<string>>
+  }
 }
 
 export const findEntryPoints: {

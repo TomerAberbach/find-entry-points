@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-import { promises as fs } from 'fs'
 import parseImports from 'parse-imports'
 
 const ignoredTypes = new Set([`builtin`, `invalid`])
 
-const parseImportSpecifiers = async ({
-  filename,
-  filenames,
-  followDynamicImports,
-  transform
-}) => {
-  const importSpecifiers = new Set()
-  const code = await transform({
-    path: filename,
-    code: await fs.readFile(filename, `utf8`)
-  })
+async function* parseImportSpecifiers({ followDynamicImports, file }) {
+  const code = await file.read()
 
   for (const { isDynamicImport, moduleSpecifier } of await parseImports(code, {
-    resolveFrom: filename
+    resolveFrom: file.path
   })) {
     // Skip dynamic imports if not enabled
     if (isDynamicImport && !followDynamicImports) {
@@ -45,17 +35,10 @@ const parseImportSpecifiers = async ({
 
     const { resolved } = moduleSpecifier
 
-    // Unresolvable import
-    if (resolved == null) {
-      continue
-    }
-
-    if (filenames.has(resolved)) {
-      importSpecifiers.add(resolved)
+    if (resolved != null) {
+      yield resolved
     }
   }
-
-  return importSpecifiers
 }
 
 export default parseImportSpecifiers

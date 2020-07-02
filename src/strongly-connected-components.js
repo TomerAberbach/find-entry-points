@@ -39,7 +39,7 @@ async function* stronglyConnectedComponents(graph) {
     })
     lowestUnusedVertexIndex++
 
-    for (const imported of await state.imports) {
+    for await (const imported of await state.imports) {
       const importedState = graph.get(imported)
 
       if (importedState.index == null) {

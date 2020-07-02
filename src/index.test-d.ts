@@ -1,9 +1,34 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { join } from 'path'
 import { expectType } from 'tsd'
-import { findEntryPoints, findSingleEntryPoints } from './index'
-;(async () => {
+import { findEntryPoints, findSingleEntryPoints, Options } from './index'
+
+const testReturnType = async (
+  filenames: Iterable<string> | AsyncIterable<string>,
+  options?: Options
+) => {
+  expectType<string[][]>(await findEntryPoints(filenames, options))
+  expectType<string[]>(await findSingleEntryPoints(filenames, options))
+}
+
+const test = async () => {
   const filenames = [`a.js`, `b.js`, `c.js`].map(name =>
-    join(__dirname, `fixtures/1`, name)
+    join(__dirname, `fixtures/normal/1`, name)
   )
 
   async function* asyncFilenames() {
@@ -12,39 +37,30 @@ import { findEntryPoints, findSingleEntryPoints } from './index'
     }
   }
 
-  expectType<string[][]>(await findEntryPoints(filenames))
-  expectType<string[][]>(await findEntryPoints(filenames[Symbol.iterator]()))
-  expectType<string[][]>(await findEntryPoints(asyncFilenames()))
+  const iterables = [
+    () => filenames,
+    filenames[Symbol.iterator],
+    asyncFilenames
+  ]
 
-  expectType<string[][]>(
-    await findEntryPoints(filenames, { followDynamicImports: true })
-  )
-  expectType<string[][]>(
-    await findEntryPoints(filenames[Symbol.iterator](), {
-      followDynamicImports: true
+  for (const iterable of iterables) {
+    await testReturnType(iterable())
+    await testReturnType(iterable(), {})
+    await testReturnType(iterable(), {
+      followDynamicImports: false
     })
-  )
-  expectType<string[][]>(
-    await findEntryPoints(asyncFilenames(), { followDynamicImports: true })
-  )
+    await testReturnType(iterable(), {
+      transform: ({ code }) => code.trim()
+    })
+    await testReturnType(iterable(), {
+      parseImports: () => []
+    })
+    await testReturnType(iterable(), {
+      followDynamicImports: false,
+      transform: ({ code }) => code,
+      parseImports: () => []
+    })
+  }
+}
 
-  expectType<string[]>(await findSingleEntryPoints(filenames))
-  expectType<string[]>(
-    await findSingleEntryPoints(filenames[Symbol.iterator]())
-  )
-  expectType<string[]>(await findSingleEntryPoints(asyncFilenames()))
-
-  expectType<string[]>(
-    await findSingleEntryPoints(filenames, { followDynamicImports: true })
-  )
-  expectType<string[]>(
-    await findSingleEntryPoints(filenames[Symbol.iterator](), {
-      followDynamicImports: true
-    })
-  )
-  expectType<string[]>(
-    await findSingleEntryPoints(asyncFilenames(), {
-      followDynamicImports: true
-    })
-  )
-})()
+test()

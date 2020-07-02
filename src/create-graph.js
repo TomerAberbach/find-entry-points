@@ -16,9 +16,38 @@
 
 import { promises as fs } from 'fs'
 import pMap from './p-map'
-import parseImportSpecifiers from './parse-import-specifiers'
 
-const createGraph = async (iterable, { followDynamicImports, transform }) => {
+const parseImportsNormalized = async ({
+  filename,
+  filenames,
+  followDynamicImports,
+  transform,
+  parseImports
+}) => {
+  const file = {
+    path: filename,
+    read: async () =>
+      transform({
+        path: filename,
+        code: await fs.readFile(filename, `utf8`)
+      })
+  }
+
+  const imports = new Set()
+
+  for await (const $import of await parseImports({
+    followDynamicImports,
+    file
+  })) {
+    if (filenames.has($import)) {
+      imports.add($import)
+    }
+  }
+
+  return imports
+}
+
+const createGraph = async (iterable, options) => {
   const filenames = new Set(
     await pMap(iterable, filename => fs.realpath(filename))
   )
@@ -26,12 +55,7 @@ const createGraph = async (iterable, { followDynamicImports, transform }) => {
 
   for (const filename of filenames) {
     graph.set(filename, {
-      imports: parseImportSpecifiers({
-        filename,
-        filenames,
-        followDynamicImports,
-        transform
-      })
+      imports: parseImportsNormalized({ filename, filenames, ...options })
     })
   }
 

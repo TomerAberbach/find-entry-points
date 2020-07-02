@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
+import { inspect } from 'util'
 import { join } from 'path'
 import test from 'ava'
 import getAllFiles from 'get-all-files'
 import { transform } from '@swc/core'
-import { findEntryPoints } from './index'
-
-const fixturePath = name => join(__dirname, `fixtures`, name)
-
-const fixtureFilenames = name => getAllFiles.async(fixturePath(name))
+import { findEntryPoints, findSingleEntryPoints } from './index'
 
 const sortEntryPoints = entryPoints => {
   entryPoints.forEach(entryPoint => entryPoint.sort())
@@ -30,56 +27,92 @@ const sortEntryPoints = entryPoints => {
   return entryPoints
 }
 
-const macro = async (t, fixtureName, expectedEntryPoints, options = {}) => {
-  const entryPoints = await findEntryPoints(
-    fixtureFilenames(fixtureName),
-    options
+const macro = async (t, fixtureName, { options, expected, expectedSingle }) => {
+  const fixturePath = join(__dirname, `fixtures`, fixtureName)
+
+  expected = sortEntryPoints(
+    expected.map(group => group.map(name => join(fixturePath, name)))
   )
-  t.deepEqual(
-    sortEntryPoints(entryPoints),
-    sortEntryPoints(expectedEntryPoints)
+  const actualEntryPoints = sortEntryPoints(
+    await findEntryPoints(getAllFiles.async(fixturePath), options)
   )
+  t.deepEqual(actualEntryPoints, expected)
+
+  expectedSingle = expectedSingle.map(name => join(fixturePath, name)).sort()
+  const actualSingleEntryPoints = (
+    await findSingleEntryPoints(getAllFiles.async(fixturePath), options)
+  ).sort()
+  t.deepEqual(actualSingleEntryPoints, expectedSingle)
 }
 
 // eslint-disable-next-line default-param-last
-macro.title = (providedTitle = ``, fixtureName) =>
-  `${providedTitle} fixture ${fixtureName}`.trim()
+macro.title = (providedTitle = ``, fixtureName, { options }) =>
+  `${providedTitle} fixture ${fixtureName}; options: ${inspect(options)}`.trim()
 
-test(macro, `normal/1`, [[fixturePath(`normal/1/b.js`)]])
+test(macro, `normal/1`, {
+  expected: [[`b.js`]],
+  expectedSingle: [`b.js`]
+})
 
-test(macro, `normal/2`, [[fixturePath(`normal/2/d.js`)]])
+test(macro, `normal/1`, {
+  options: { followDynamicImports: false },
+  expected: [[`b.js`], [`c.js`]],
+  expectedSingle: [`b.js`, `c.js`]
+})
 
-test(macro, `normal/3`, [
-  [
-    fixturePath(`normal/3/a.js`),
-    fixturePath(`normal/3/b.js`),
-    fixturePath(`normal/3/c.js`)
-  ]
-])
+test(macro, `normal/1`, {
+  options: {
+    parseImports: ({ file }) => [file.path]
+  },
+  expected: [[`a.js`], [`b.js`], [`c.js`]],
+  expectedSingle: []
+})
 
-test(macro, `normal/4`, [
-  [fixturePath(`normal/4/a.js`)],
-  [fixturePath(`normal/4/c.js`)]
-])
+test(macro, `normal/1`, {
+  options: {
+    transform: ({ code }) => code.trim(),
+    parseImports: ({ path }) => [path]
+  },
+  expected: [[`a.js`], [`b.js`], [`c.js`]],
+  expectedSingle: [`a.js`, `b.js`, `c.js`]
+})
 
-test(macro, `normal`, [
-  [fixturePath(`normal/1/b.js`)],
-  [fixturePath(`normal/2/d.js`)],
-  [
-    fixturePath(`normal/3/a.js`),
-    fixturePath(`normal/3/b.js`),
-    fixturePath(`normal/3/c.js`)
+test(macro, `normal/2`, {
+  expected: [[`d.js`]],
+  expectedSingle: [`d.js`]
+})
+
+test(macro, `normal/3`, {
+  expected: [[`a.js`, `b.js`, `c.js`]],
+  expectedSingle: []
+})
+
+test(macro, `normal/4`, {
+  expected: [[`a.js`], [`c.js`]],
+  expectedSingle: [`a.js`, `c.js`]
+})
+
+test(macro, `normal`, {
+  expected: [
+    [`1/b.js`],
+    [`2/d.js`],
+    [`3/a.js`, `3/b.js`, `3/c.js`],
+    [`4/a.js`],
+    [`4/c.js`]
   ],
-  [fixturePath(`normal/4/a.js`)],
-  [fixturePath(`normal/4/c.js`)]
-])
+  expectedSingle: [`1/b.js`, `2/d.js`, `4/a.js`, `4/c.js`]
+})
 
-test(macro, `jsx`, [[fixturePath(`jsx/a.js`)]], {
-  transform: async ({ path, code }) =>
-    (
-      await transform(code, {
-        filename: path,
-        jsc: { parser: { jsx: true } }
-      })
-    ).code
+test(macro, `jsx`, {
+  options: {
+    transform: async ({ path, code }) =>
+      (
+        await transform(code, {
+          filename: path,
+          jsc: { parser: { jsx: true } }
+        })
+      ).code
+  },
+  expected: [[`a.js`]],
+  expectedSingle: [`a.js`]
 })

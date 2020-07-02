@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import './a'
+import parseImportSpecifiers from './parse-import-specifiers'
 
-const main = async () => {
-  await import('./c')
-}
+const normalizeOptions = ({
+  followDynamicImports = true,
+  transform = ({ code }) => code,
+  parseImports = parseImportSpecifiers
+} = {}) => ({
+  followDynamicImports,
+  transform,
+  parseImports
+})
+
+export default normalizeOptions

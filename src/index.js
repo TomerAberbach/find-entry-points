@@ -18,12 +18,12 @@ import assert from 'assert'
 import createGraph from './create-graph'
 import stronglyConnectedComponents from './strongly-connected-components'
 import pMap from './p-map'
+import normalizeOptions from './normalize-options'
 
-export const findEntryPoints = async (
-  iterable,
-  { followDynamicImports = true, transform = ({ code }) => code } = {}
-) => {
-  const graph = await createGraph(iterable, { followDynamicImports, transform })
+export const findEntryPoints = async (iterable, options) => {
+  options = normalizeOptions(options)
+
+  const graph = await createGraph(iterable, options)
   const entryPointComponents = []
 
   for await (const stronglyConnectedComponent of stronglyConnectedComponents(
@@ -32,7 +32,7 @@ export const findEntryPoints = async (
     entryPointComponents.push(stronglyConnectedComponent)
 
     await pMap(stronglyConnectedComponent, async filename => {
-      for (const imported of await graph.get(filename).imports) {
+      for await (const imported of await graph.get(filename).imports) {
         if (stronglyConnectedComponent.has(imported)) {
           continue
         }
@@ -50,24 +50,17 @@ export const findEntryPoints = async (
     .map(entryPointComponent => Array.from(entryPointComponent))
 }
 
-export const findSingleEntryPoints = async (
-  iterable,
-  { followDynamicImports = true } = {}
-) => {
-  const graph = await createGraph(iterable, { followDynamicImports })
+export const findSingleEntryPoints = async (iterable, options) => {
+  options = normalizeOptions(options)
+
+  const graph = await createGraph(iterable, options)
   const entryPoints = new Set(graph.keys())
-  const promises = []
 
-  for (const { imports } of graph) {
-    promises.push(
-      (async () => {
-        for (const filename of await imports) {
-          entryPoints.delete(filename)
-        }
-      })()
-    )
-  }
+  await pMap(graph.values(), async ({ imports }) => {
+    for await (const filename of await imports) {
+      entryPoints.delete(filename)
+    }
+  })
 
-  await Promise.all(promises)
   return [...entryPoints]
 }

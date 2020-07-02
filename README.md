@@ -20,7 +20,7 @@ Given a sync or async iterable of paths to the JavaScript files with the followi
 
 ![](docs/example1.svg)
 
-This package would return `[['a.js']]` because `a.js` is the entry point of the above JavaScript library or application (it is not imported by any JavaScript file).
+The `findEntryPoints` function would return `[['a.js']]` because `a.js` is the entry point of the above JavaScript library or application (it is not imported by any JavaScript file). The `findSingleEntryPoints` function would return `['a.js']`.
 
 ## Example 2
 
@@ -28,7 +28,7 @@ Given a sync or async iterable of paths to the JavaScript files with the followi
 
 ![](docs/example2.svg)
 
-This package would return `[['a.js'], ['f.js'], ['g.js']]` (order not guaranteed) because `a.js`, `f.js`, and `g.js` are all not imported by any JavaScript file. Notice that it is possible to have a disconnected dependency graph.
+The `findEntryPoints` function would return `[['a.js'], ['f.js'], ['g.js']]` (order not guaranteed) because `a.js`, `f.js`, and `g.js` are all not imported by any JavaScript file. Notice that it is possible to have a disconnected dependency graph. The `findSingleEntryPoints` function would return `['a.js', 'f.js', 'g.js']` (order not guaranteed).
 
 ## Example 3
 
@@ -36,7 +36,7 @@ Given a sync or async iterable of paths to the JavaScript files with the followi
 
 ![](docs/example3.svg)
 
-This package would return `[['a.js'], ['g.js']]` (order not guaranteed). Notice that cycles are possible because imports are cached.
+The `findEntryPoints` function would return `[['a.js'], ['g.js']]` (order not guaranteed). Notice that cycles are possible because imports are cached. The `findSingleEntryPoints` function would return `['a.js', 'g.js']` (order not guaranteed).
 
 ### Example 4
 
@@ -44,7 +44,7 @@ Given a sync or async iterable of paths to the JavaScript files with the followi
 
 ![](docs/example4.svg)
 
-This package would return `[['a.js'], ['g.js', 'h.js', 'i.js']]` (order not guaranteed). Notice that this is the first example where an inner array contains more than one element. This is because `g.js`, `h.js`, and `i.js` are all valid entry points for their graph component.
+The `findEntryPoints` function would return `[['a.js'], ['g.js', 'h.js', 'i.js']]` (order not guaranteed). Notice that this is the first example where an inner array contains more than one element. This is because `g.js`, `h.js`, and `i.js` are all valid entry points for their graph component. The `findSingleEntryPoints` function would return `['a.js']` (order not guaranteed).
 
 ## Usage
 
@@ -59,22 +59,22 @@ import * as swc from '@swc/core'
 
 const main = async () => {
   // `globby.stream` returns an async iterable of file paths
-  console.log(await findEntryPoints(globby.stream('src/*.js')))
+  console.log(await findEntryPoints(globby.stream('src/**/*.js')))
   //=> [['src/a.js'], ['src/g.js', 'src/h.js', 'src/i.js']]
 
   // `findSingleEntryPoints` ignores cyclic entry points
-  console.log(await findSingleEntryPoints(globby.stream('src/*.js')))
+  console.log(await findSingleEntryPoints(globby.stream('src/**/*.js')))
   // => ['src/a.js']
 
   console.log(
-    await findEntryPoints(globby.stream('src/*.js'), {
+    await findEntryPoints(globby.stream('src/**/*.js'), {
       followDynamicImports: false
     })
   )
   //=> [['src/a.js'], ['src/i.js']]
 
   console.log(
-    await findSingleEntryPoints(globby.stream('src/*.js'), {
+    await findSingleEntryPoints(globby.stream('src/**/*.js'), {
       followDynamicImports: false
     })
   )
@@ -83,7 +83,7 @@ const main = async () => {
   // Use the `transform` option to transform non-standard syntax
   // like JSX to standard ECMAScript so that imports can be parsed
   console.log(
-    await findEntryPoints(globby.stream('src/*.js'), {
+    await findEntryPoints(globby.stream('src/**/*.js'), {
       transform: async ({ path, code }) =>
         (
           await transform(code, {
@@ -94,6 +94,34 @@ const main = async () => {
     })
   )
   //=> [['src/a.js'], ['src/g.js', 'src/h.js', 'src/i.js']]
+
+  console.log(
+    await findSingleEntryPoints(globby.stream('src/**/*.js'), {
+      transform: async ({ path, code }) =>
+        (
+          await transform(code, {
+            filename: path,
+            jsc: { parser: { jsx: true } }
+          })
+        ).code
+    })
+  )
+  //=> ['src/a.js']
+
+  // Use the `parseImports` option to parse imports yourself
+  console.log(
+    await findEntryPoints(globby.stream('src/**/*.js'), {
+      parseImports: async ({ followDynamicImports, file }) => {
+        const { path, read } = file
+
+        // Read the file if you want
+        const code = await read()
+        const importedFilenames = yourFancyImportParser(code)
+
+        return importedFilenames
+      }
+    })
+  )
 }
 
 main()
