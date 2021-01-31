@@ -127,7 +127,7 @@ const main = async () => {
 main()
 ```
 
-See [the commented type definitions](https://github.com/TomerAberbach/find-entry-points/blob/master/src/index.d.ts) for clarification.
+See [the commented type definitions](https://github.com/TomerAberbach/find-entry-points/blob/main/src/index.d.ts) for clarification.
 
 ## How?
 
@@ -139,10 +139,10 @@ Stars are always welcome!
 
 For bugs and feature requests, [please create an issue](https://github.com/TomerAberbach/find-entry-points/issues/new).
 
-For pull requests, please read the [contributing guidelines](https://github.com/TomerAberbach/find-entry-points/blob/master/CONTRIBUTING.md).
+For pull requests, please read the [contributing guidelines](https://github.com/TomerAberbach/find-entry-points/blob/main/contributing.md).
 
 ## License
 
-[Apache 2.0](https://github.com/TomerAberbach/find-entry-points/blob/master/LICENSE)
+[Apache 2.0](https://github.com/TomerAberbach/find-entry-points/blob/main/license)
 
 This is not an official Google product.
