@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import parseImportSpecifiers from './parse-import-specifiers'
+import parseImportSpecifiers from './parse-import-specifiers.js'
 
 const normalizeOptions = ({
   followDynamicImports = true,

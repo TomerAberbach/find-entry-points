@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-/// <reference types="node"/>
-
 /**
  * The options type for {@link findEntryPoints} and {@link findSingleEntryPoints}.
  */
-export interface Options {
+export type Options = {
   /**
    * Determines if dynamic imports (with constant module specifiers) are followed
    * when constructing dependency graphs in {@link findEntryPoints} and {@link findSingleEntryPoints}.
@@ -31,9 +29,10 @@ export interface Options {
    * for imports. Can be used to transform to standard ECMAScript so that imports
    * are properly parsed. Code is not transformed if this option is left unspecified.
    */
-  readonly transform?: {
-    (file: { path: string; code: string }): PromiseLike<string> | string
-  }
+  readonly transform?: (file: {
+    path: string
+    code: string
+  }) => PromiseLike<string> | string
 
   /**
    * Called with each JavaScript file's path and function for reading its contents asynchronously.
@@ -41,43 +40,37 @@ export interface Options {
    * (optionally asynchronously). Can be used to customize import parsing. Uses the `parse-imports`
    * package if this option is left unspecified.
    */
-  readonly parseImports?: {
-    (data: {
-      followDynamicImports: boolean
-      file: { path: string; read: () => Promise<string> }
-    }):
-      | Iterable<string>
-      | AsyncIterable<string>
-      | PromiseLike<Iterable<string> | AsyncIterable<string>>
-  }
+  readonly parseImports?: (data: {
+    followDynamicImports: boolean
+    file: { path: string; read: () => Promise<string> }
+  }) =>
+    | Iterable<string>
+    | AsyncIterable<string>
+    | PromiseLike<Iterable<string> | AsyncIterable<string>>
 }
 
-export const findEntryPoints: {
-  /**
-   * Finds the logical entry point JavaScript filename groups in `iterable`.
-   * @param iterable Sync or async iterable of JavaScript filenames.
-   * @param options Options that determine the imports used to construct a dependency graph from `iterable`.
-   * @returns The groups of JavaScript filenames in `iterable`, such that each file in each group directly or
-   *   transitively imports every other file in its group and is not imported by any file in `iterable`
-   *   outside its group. In other words, the strongly connected components with in-degree 0 of the dependency
-   *   graph formed by the filenames in `iterable`.
-   */
-  (
-    iterable: AsyncIterable<string> | Iterable<string>,
-    options?: Options
-  ): Promise<string[][]>
-}
+/**
+ * Finds the logical entry point JavaScript filename groups in `iterable`.
+ * @param iterable Sync or async iterable of JavaScript filenames.
+ * @param options Options that determine the imports used to construct a dependency graph from `iterable`.
+ * @returns The groups of JavaScript filenames in `iterable`, such that each file in each group directly or
+ *   transitively imports every other file in its group and is not imported by any file in `iterable`
+ *   outside its group. In other words, the strongly connected components with in-degree 0 of the dependency
+ *   graph formed by the filenames in `iterable`.
+ */
+export const findEntryPoints: (
+  iterable: AsyncIterable<string> | Iterable<string>,
+  options?: Options
+) => Promise<Array<Array<string>>>
 
-export const findSingleEntryPoints: {
-  /**
-   * Finds the logical entry point JavaScript filenames in `iterable`.
-   * @param iterable Sync or async iterable of JavaScript filenames.
-   * @param options Options that determine the imports used to construct a dependency graph from `iterable`.
-   * @returns The JavaScript filenames in `iterable` that are not imported by any file in `iterable`. In other
-   *   words, the vertices with in-degree 0 of the dependency graph formed by the filenames in `iterable`.
-   */
-  (
-    iterable: AsyncIterable<string> | Iterable<string>,
-    options?: Options
-  ): Promise<string[]>
-}
+/**
+ * Finds the logical entry point JavaScript filenames in `iterable`.
+ * @param iterable Sync or async iterable of JavaScript filenames.
+ * @param options Options that determine the imports used to construct a dependency graph from `iterable`.
+ * @returns The JavaScript filenames in `iterable` that are not imported by any file in `iterable`. In other
+ *   words, the vertices with in-degree 0 of the dependency graph formed by the filenames in `iterable`.
+ */
+export const findSingleEntryPoints: (
+  iterable: AsyncIterable<string> | Iterable<string>,
+  options?: Options
+) => Promise<Array<string>>

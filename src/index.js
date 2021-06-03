@@ -15,10 +15,10 @@
  */
 
 import assert from 'assert'
-import createGraph from './create-graph'
-import stronglyConnectedComponents from './strongly-connected-components'
-import pMap from './p-map'
-import normalizeOptions from './normalize-options'
+import createGraph from './create-graph.js'
+import stronglyConnectedComponents from './strongly-connected-components.js'
+import pMap from './p-map.js'
+import normalizeOptions from './normalize-options.js'
 
 export const findEntryPoints = async (iterable, options) => {
   options = normalizeOptions(options)

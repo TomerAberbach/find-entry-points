@@ -22,73 +22,72 @@
   "bugs": {
     "url": "https://github.com/TomerAberbach/find-entry-points/issues"
   },
-  "license": "Apache 2.0",
-  "main": "dist/main/index.js",
-  "module": "dist/module/index.js",
-  "types": "src/index.d.ts",
+  "license": "Apache-2.0",
   "files": [
-    "dist",
-    "src/index.d.ts"
+    "src"
   ],
-  "scripts": {
-    "license": "addlicense $(git diff --name-only HEAD)",
-    "lint:eslint:base": "eslint --cache --ext mjs,cjs,js --ignore-path .gitignore --ignore-pattern \"**/fixtures/**/*\"",
-    "lint:eslint": "pnpm run lint:eslint:base -- --fix .",
-    "lint:prettier:base": "prettier --loglevel silent",
-    "lint:prettier": "pnpm run lint:prettier:base -- --write .",
-    "lint": "run-s lint:*",
-    "test:ava": "ava",
-    "test:tsd": "tsd",
-    "test": "run-s test:*",
-    "build:base": "babel --delete-dir-on-start --keep-file-extension --ignore \"src/**/*.test.js,src/**/fixtures/**/*\"",
-    "build:dev": "pnpm run build:base -- -d dist src",
-    "build:main": "cross-env NODE_ENV=main pnpm run build:base -- -d dist/main src",
-    "build:module": "cross-env NODE_ENV=module pnpm run build:base -- -d dist/module src",
-    "build:prod": "run-p build:main build:module",
-    "clean": "rimraf dist",
-    "prepublishOnly": "run-s test clean build:prod"
+  "type": "module",
+  "engines": {
+    "node": ">= 12.17"
   },
+  "exports": "./src/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "scripts": {
+    "prepare": "pnpx --no-install simple-git-hooks",
+    "lint:prettier:base": "prettier --loglevel silent --ignore-path .eslintignore",
+    "lint:prettier": "run-s \"lint:prettier:base -- --write .\"",
+    "lint:eslint:base": "eslint --cache --ext js --ignore-path .eslintignore",
+    "lint:eslint": "run-s \"lint:eslint:base -- --fix .\"",
+    "lint": "run-s lint:*",
+    "test:js": "ava",
+    "test:ts": "tsd",
+    "test": "run-s test:*",
+    "coverage": "c8 run-s test:js"
+  },
+  "prettier": "@tomer/prettier-config",
   "eslintConfig": {
     "extends": "@tomer"
   },
-  "prettier": "@tomer/prettier-config",
-  "browserslist": [
-    "node >= 10"
-  ],
+  "lint-staged": {
+    "*.js": [
+      "run-s \"lint:prettier:base -- --write {@}\" --",
+      "run-s \"lint:eslint:base -- --fix {@}\" --"
+    ],
+    "*.ts": "run-s \"lint:prettier:base -- --write {@}\" --",
+    "*.{json,yml,md}": "run-s \"lint:prettier:base -- --write {@}\" --"
+  },
+  "tsd": {
+    "directory": "./test"
+  },
+  "commitlint": {
+    "extends": "@commitlint/config-conventional"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpx --no-install lint-staged",
+    "commit-msg": "pnpx --no-install commitlint -e"
+  },
   "dependencies": {
-    "parse-imports": "0.0.4"
+    "parse-imports": "1.0.0"
   },
   "devDependencies": {
-    "@ava/babel": "1.0.1",
-    "@babel/cli": "7.10.4",
-    "@babel/core": "7.10.4",
-    "@babel/preset-env": "7.10.4",
-    "@babel/register": "7.10.4",
-    "@commitlint/cli": "9.0.1",
-    "@commitlint/config-conventional": "9.0.1",
-    "@swc/core": "1.2.6",
-    "@tomer/eslint-config": "0.0.5",
-    "@tomer/prettier-config": "0.0.2",
-    "@types/node": "14.0.14",
-    "ava": "3.9.0",
-    "ava-fast-check": "1.1.2",
-    "babel-eslint": "10.1.0",
-    "babel-plugin-unassert": "3.0.1",
-    "babel-preset-power-assert": "3.0.0",
-    "command-exists": "1.2.9",
-    "cross-env": "7.0.2",
-    "eslint": "7.3.1",
-    "eslint-config-prettier": "6.11.0",
-    "eslint-plugin-ava": "10.3.1",
-    "eslint-plugin-prettier": "3.1.4",
-    "fast-check": "1.25.1",
-    "get-all-files": "3.0.0",
-    "husky": "4.2.5",
-    "lint-staged": "10.2.11",
+    "@commitlint/cli": "12.1.4",
+    "@commitlint/config-conventional": "12.1.4",
+    "@swc/core": "1.2.59",
+    "@tomer/eslint-config": "0.1.1",
+    "@tomer/prettier-config": "0.1.0",
+    "@types/node": "15.9.0",
+    "ava": "3.15.0",
+    "ava-fast-check": "4.0.2",
+    "c8": "7.7.2",
+    "eslint": "7.27.0",
+    "fast-check": "2.16.0",
+    "get-all-files": "4.0.0",
+    "lint-staged": "11.0.0",
     "npm-run-all": "4.1.5",
-    "power-assert": "1.6.1",
-    "prettier": "2.0.5",
-    "rimraf": "3.0.2",
-    "tsd": "0.12.0"
+    "prettier": "2.3.0",
+    "simple-git-hooks": "2.4.1",
+    "tsd": "0.16.0",
+    "typescript": "4.3.2"
   }
 }

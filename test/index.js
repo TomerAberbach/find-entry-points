@@ -15,11 +15,12 @@
  */
 
 import { inspect } from 'util'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import test from 'ava'
-import getAllFiles from 'get-all-files'
+import { getAllFiles } from 'get-all-files'
 import { transform } from '@swc/core'
-import { findEntryPoints, findSingleEntryPoints } from './index'
+import { findEntryPoints, findSingleEntryPoints } from '../src/index.js'
 
 const sortEntryPoints = entryPoints => {
   entryPoints.forEach(entryPoint => entryPoint.sort())
@@ -28,19 +29,23 @@ const sortEntryPoints = entryPoints => {
 }
 
 const macro = async (t, fixtureName, { options, expected, expectedSingle }) => {
-  const fixturePath = join(__dirname, `fixtures`, fixtureName)
+  const fixturePath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    `fixtures`,
+    fixtureName
+  )
 
   expected = sortEntryPoints(
     expected.map(group => group.map(name => join(fixturePath, name)))
   )
   const actualEntryPoints = sortEntryPoints(
-    await findEntryPoints(getAllFiles.async(fixturePath), options)
+    await findEntryPoints(getAllFiles(fixturePath), options)
   )
   t.deepEqual(actualEntryPoints, expected)
 
   expectedSingle = expectedSingle.map(name => join(fixturePath, name)).sort()
   const actualSingleEntryPoints = (
-    await findSingleEntryPoints(getAllFiles.async(fixturePath), options)
+    await findSingleEntryPoints(getAllFiles(fixturePath), options)
   ).sort()
   t.deepEqual(actualSingleEntryPoints, expectedSingle)
 }

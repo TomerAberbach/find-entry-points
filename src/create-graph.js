@@ -15,7 +15,7 @@
  */
 
 import { promises as fs } from 'fs'
-import pMap from './p-map'
+import pMap from './p-map.js'
 
 const parseImportsNormalized = async ({
   filename,
