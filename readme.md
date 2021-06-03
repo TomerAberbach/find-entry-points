@@ -39,7 +39,7 @@ entry point of the above JavaScript library or application (it is not imported
 by any JavaScript file). The `findSingleEntryPoints` function would return
 `['a.js']`.
 
-## Example 2
+### Example 2
 
 Given a sync or async iterable of paths to the JavaScript files with the
 following dependencies between them:
@@ -52,7 +52,7 @@ by any JavaScript file. Notice that it is possible to have a disconnected
 dependency graph. The `findSingleEntryPoints` function would return
 `['a.js', 'f.js', 'g.js']` (order not guaranteed).
 
-## Example 3
+### Example 3
 
 Given a sync or async iterable of paths to the JavaScript files with the
 following dependencies between them:
